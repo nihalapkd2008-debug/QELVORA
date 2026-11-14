@@ -460,3 +460,63 @@
     animation: none;
   }
 }
+
+
+.navbar {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  z-index: 1000;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 24px 7%;
+  margin-bottom: -80px;
+
+  background: transparent;
+  border-bottom: 1px solid transparent;
+
+  transition: all 0.35s ease;
+}
+
+.navbar.scrolled {
+  background: rgba(20, 17, 15, 0.94);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  padding-top: 17px;
+  padding-bottom: 17px;
+}
+/* Transparent navbar with automatic text contrast */
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: transparent !important;
+  mix-blend-mode: normal;
+}
+
+/* Automatically invert text based on the background */
+.navbar .brand-logo,
+.navbar .brand-logo span,
+.navbar .nav-links a,
+.navbar .nav-actions button {
+  color: white;
+  mix-blend-mode: difference;
+}
+
+/* Navbar after scrolling */
+.navbar.scrolled {
+  background: rgba(20, 17, 15, 0.94) !important;
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.navbar.scrolled .brand-logo,
+.navbar.scrolled .brand-logo span,
+.navbar.scrolled .nav-links a,
+.navbar.scrolled .nav-actions button {
+  color: white;
+  mix-blend-mode: normal;
+}
