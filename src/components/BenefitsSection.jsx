@@ -24,7 +24,7 @@ const benefits = [
 
 function BenefitsSection() {
   return (
-    <section className="benefits-section">
+    <section className="benefits-section" data-navbar-theme="light">
       <div className="benefits-heading">
         <p>THE QELVORA DIFFERENCE</p>
         <h2>Considered in every detail.</h2>

@@ -1,12 +1,11 @@
-
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600&display=swap');
+@import "tailwindcss";
 
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
-
 html {
   scroll-behavior: smooth;
 }
@@ -31,7 +30,7 @@ button {
 
 .announcement-bar {
   min-height: 34px;
-  background: #171717;
+   background: #171717;
   color: #f5f1e9;
   display: flex;
   align-items: center;
@@ -41,6 +40,7 @@ button {
   font-size: 9px;
   letter-spacing: 1.5px;
 }
+
 
 .announcement-bar span {
   color: #c5a77d;
@@ -326,6 +326,9 @@ button {
   overflow: hidden;
   background: #ded8ce;
   cursor: pointer;
+    display: block;
+  text-decoration: none;
+  color: inherit;
 }
 
 .category-card.category-large {
@@ -924,4 +927,7 @@ button {
   .arrival-track {
     animation: none;
   }
+}
+#new-arrivals {
+  scroll-margin-top: 90px;
 }

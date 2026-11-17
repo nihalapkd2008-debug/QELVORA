@@ -1,0 +1,367 @@
+/* ===== Login & Register (AuthLayout + FormField) ===== */
+
+.auth-page {
+  position: relative;
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  background: #171717;
+  color: #fff;
+  font-family: "DM Sans", sans-serif;
+  overflow: hidden;
+}
+
+/* ---------- Background photos ---------- */
+.auth-background {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+  padding: 8px;
+  background: #14110e;
+}
+
+.auth-background img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border-radius: 14px;
+}
+
+.auth-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    rgba(10, 8, 6, 0.85) 0%,
+    rgba(10, 8, 6, 0.55) 38%,
+    rgba(10, 8, 6, 0.15) 62%,
+    rgba(10, 8, 6, 0.25) 100%
+  );
+}
+
+/* ---------- Left side ---------- */
+.auth-brand-side {
+  position: relative;
+  z-index: 1;
+  padding: 42px 55px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.auth-brand,
+.auth-panel-brand {
+  color: #fff;
+  text-decoration: none;
+  font-size: 27px;
+  font-weight: 600;
+  letter-spacing: 5px;
+}
+
+.auth-brand span,
+.auth-panel-brand span {
+  color: #b99a62;
+}
+
+.auth-side-content {
+  max-width: 480px;
+}
+
+.auth-side-eyebrow {
+  font-size: 10px;
+  letter-spacing: 3px;
+  font-weight: 600;
+  color: #e0c892;
+}
+
+.auth-side-eyebrow::before {
+  content: "";
+  display: inline-block;
+  width: 36px;
+  height: 1px;
+  background: #b99a62;
+  margin-right: 14px;
+  vertical-align: middle;
+}
+
+.auth-side-content h1 {
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: clamp(40px, 4.6vw, 64px);
+  line-height: 1.1;
+  font-weight: 400;
+  margin: 22px 0;
+}
+
+.auth-side-content p {
+  color: #e6e1d8;
+  font-size: 14px;
+  line-height: 1.8;
+}
+
+.auth-categories {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 0;
+  padding: 0;
+  margin: 0;
+}
+
+.auth-categories li {
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #d8d2c8;
+}
+
+/* gold dot between the names */
+.auth-categories li:not(:last-child)::after {
+  content: "•";
+  color: #b99a62;
+  margin: 0 14px;
+}
+
+/* ---------- Right side (glass panel) ---------- */
+.auth-panel-wrap {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 30px;
+}
+
+/* the floating glass card */
+.auth-panel {
+  width: 100%;
+  max-width: 440px;
+  padding: 42px 38px;
+  background: rgba(18, 14, 10, 0.5);
+  -webkit-backdrop-filter: blur(22px);
+  backdrop-filter: blur(22px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 22px;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
+  animation: auth-fade-up 0.6s ease;
+}
+
+@keyframes auth-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.auth-panel-brand {
+  display: none;
+}
+
+.auth-eyebrow {
+  font-size: 10px;
+  letter-spacing: 3px;
+  font-weight: 600;
+  color: #e0c892;
+}
+
+.auth-panel h2 {
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 38px;
+  font-weight: 400;
+  margin: 12px 0 10px;
+}
+
+.auth-description {
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 13px;
+  line-height: 1.7;
+  margin-bottom: 28px;
+}
+
+/* ---------- FormField ---------- */
+.form-field {
+  margin-bottom: 18px;
+}
+
+.form-field label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.form-field-box {
+  position: relative;
+}
+
+.form-field-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  color: #8a7965;
+  pointer-events: none;
+}
+
+.form-field-box input {
+  width: 100%;
+  padding: 14px 14px 14px 44px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: #fff;
+  color: #171717;
+  font-family: inherit;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.form-field-box input::placeholder {
+  color: #aaa59b;
+}
+
+.form-field-box input:focus {
+  border-color: #b99a62;
+  box-shadow: 0 0 0 3px rgba(185, 154, 98, 0.35);
+}
+
+.form-field-box input.has-toggle {
+  padding-right: 70px;
+}
+
+.form-field-toggle {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 8px;
+  border: 0;
+  background: transparent;
+  color: #927b55;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  cursor: pointer;
+}
+
+.form-field-toggle:hover {
+  color: #171717;
+}
+
+/* ---------- Button, links, messages ---------- */
+.auth-submit {
+  width: 100%;
+  padding: 16px;
+  margin-top: 8px;
+  border: 0;
+  border-radius: 8px;
+  background: #b99a62;
+  color: #171717;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  cursor: pointer;
+  transition: background 0.25s ease;
+}
+
+.auth-submit:hover {
+  background: #cdb07a;
+}
+
+.auth-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.auth-switch {
+  text-align: center;
+  margin-top: 26px;
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 13px;
+}
+
+.auth-switch a {
+  color: #e0c892;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.auth-back-link {
+  display: block;
+  text-align: center;
+  margin-top: 20px;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 12px;
+  text-decoration: none;
+  transition: color 0.25s ease;
+}
+
+.auth-back-link:hover {
+  color: #fff;
+}
+
+.auth-error,
+.auth-success {
+  padding: 12px 14px;
+  font-size: 12px;
+  line-height: 1.6;
+  margin-bottom: 18px;
+  border-radius: 6px;
+}
+
+.auth-error {
+  color: #ffd9d9;
+  background: rgba(180, 40, 40, 0.35);
+  border-left: 3px solid #ff8a8a;
+}
+
+.auth-success {
+  color: #d8f3e0;
+  background: rgba(40, 140, 80, 0.35);
+  border-left: 3px solid #7be0a0;
+}
+
+/* ---------- Mobile ---------- */
+@media (max-width: 800px) {
+  .auth-page {
+    grid-template-columns: 1fr;
+  }
+
+  .auth-background {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .auth-overlay {
+    background: rgba(10, 8, 6, 0.45);
+  }
+
+  .auth-brand-side {
+    display: none;
+  }
+
+  .auth-panel-wrap {
+    padding: 30px 16px;
+  }
+
+  .auth-panel {
+    padding: 34px 24px;
+  }
+
+  .auth-panel-brand {
+    display: block;
+    text-align: center;
+    margin-bottom: 30px;
+  }
+
+  .auth-panel h2 {
+    font-size: 32px;
+  }
+}

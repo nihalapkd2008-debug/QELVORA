@@ -1,7 +1,7 @@
 
 function Hero() {
   return (
-    <section className="hero" id="home">
+    <section className="hero" id="home" data-navbar-theme="dark">
       <div className="hero-image"></div>
 
       <div className="hero-content">
