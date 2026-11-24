@@ -1,5 +1,11 @@
 
-import { useCallback, useEffect, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+
 import ShopContext from "./ShopContext.js";
 import api from "../../services/api";
 
@@ -33,6 +39,9 @@ export function ShopProvider({ children }) {
   const [cart, setCart] = useState(getLocalCart);
   const [isCartLoading, setIsCartLoading] = useState(false);
 
+  // Prevent duplicate cart loading requests
+  const cartLoadPromiseRef = useRef(null);
+
   const isLoggedIn = () =>
     Boolean(localStorage.getItem("access_token"));
 
@@ -58,45 +67,56 @@ export function ShopProvider({ children }) {
   const loadBackendCart = useCallback(async () => {
     if (!isLoggedIn()) return;
 
+    // Avoid duplicate simultaneous requests
+    if (cartLoadPromiseRef.current) {
+      return cartLoadPromiseRef.current;
+    }
+
     setIsCartLoading(true);
 
-    try {
+    const loadPromise = (async () => {
       let response = await api.get("cart/");
       let backendItems = response.data.items || [];
 
       const localItems = getLocalCart();
 
       // Merge guest cart into backend cart
-      for (const localItem of localItems) {
-        const existing = backendItems.find(
-          (item) => item.product.id === localItem.id
-        );
+      if (localItems.length > 0) {
+        for (const localItem of localItems) {
+          const existing = backendItems.find(
+            (item) => item.product.id === localItem.id
+          );
 
-        if (existing) {
-          await api.patch(`cart/items/${existing.id}/`, {
-            quantity: existing.quantity + localItem.quantity,
-          });
-        } else {
-          await api.post("cart/", {
-            product_id: localItem.id,
-            quantity: localItem.quantity,
-          });
+          if (existing) {
+            await api.patch(`cart/items/${existing.id}/`, {
+              quantity: existing.quantity + localItem.quantity,
+            });
+          } else {
+            await api.post("cart/", {
+              product_id: localItem.id,
+              quantity: localItem.quantity,
+            });
+          }
         }
+
+        // Fetch updated cart after merging
+        response = await api.get("cart/");
+        backendItems = response.data.items || [];
+
+        localStorage.removeItem("qelvora-cart");
       }
 
-      // Fetch latest backend cart
-      response = await api.get("cart/");
+      setCart(formatCartItems(backendItems));
+    })();
 
-      const latestItems = response.data.items || [];
+    cartLoadPromiseRef.current = loadPromise;
 
-      console.log("Latest backend cart:", latestItems);
-
-      setCart(formatCartItems(latestItems));
-
-      localStorage.removeItem("qelvora-cart");
+    try {
+      await loadPromise;
     } catch (error) {
       console.error("Cart loading error:", error);
     } finally {
+      cartLoadPromiseRef.current = null;
       setIsCartLoading(false);
     }
   }, []);
@@ -172,27 +192,15 @@ export function ShopProvider({ children }) {
 
   // Update quantity
   const updateQuantity = async (productId, change) => {
-    if (!isLoggedIn()) {
-      setCart((current) =>
-        current.map((item) =>
-          item.id === productId
-            ? {
-                ...item,
-                quantity: Math.max(1, item.quantity + change),
-              }
-            : item
-        )
-      );
-
-      return;
-    }
-
     const item = cart.find(
       (product) => product.id === productId
     );
 
-    if (!item?.cartItemId) {
-      await loadBackendCart();
+    if (!item) return;
+
+    // Do not allow quantity below 1
+    // No API request when quantity is already 1
+    if (change < 0 && item.quantity <= 1) {
       return;
     }
 
@@ -200,6 +208,24 @@ export function ShopProvider({ children }) {
       1,
       item.quantity + change
     );
+
+    // Guest cart
+    if (!isLoggedIn()) {
+      setCart((current) =>
+        current.map((product) =>
+          product.id === productId
+            ? { ...product, quantity: newQuantity }
+            : product
+        )
+      );
+
+      return;
+    }
+
+    if (!item.cartItemId) {
+      await loadBackendCart();
+      return;
+    }
 
     try {
       await api.patch(`cart/items/${item.cartItemId}/`, {
@@ -275,7 +301,7 @@ export function ShopProvider({ children }) {
     try {
       const response = await api.post("orders/");
 
-      // Backend order success aayal cart clear cheyyuka
+      // Clear cart after successful order
       setCart([]);
       localStorage.removeItem("qelvora-cart");
 
@@ -284,10 +310,10 @@ export function ShopProvider({ children }) {
       console.error("Place order error:", error);
 
       throw new Error(
-  error.response?.data?.error ||
-  "Unable to place your order. Please try again.",
-  { cause: error }
-);
+        error.response?.data?.error ||
+        "Unable to place your order. Please try again.",
+        { cause: error }
+      );
     }
   };
 
@@ -307,17 +333,17 @@ export function ShopProvider({ children }) {
   return (
     <ShopContext.Provider
       value={{
-  wishlist,
-  cart,
-  cartCount,
-  cartTotal,
-  isCartLoading,
-  toggleWishlist,
-  addToCart,
-  updateQuantity,
-  removeFromCart,
-  placeOrder,
-}}
+        wishlist,
+        cart,
+        cartCount,
+        cartTotal,
+        isCartLoading,
+        toggleWishlist,
+        addToCart,
+        updateQuantity,
+        removeFromCart,
+        placeOrder,
+      }}
     >
       {children}
     </ShopContext.Provider>

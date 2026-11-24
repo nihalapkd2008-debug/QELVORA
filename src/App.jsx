@@ -58,23 +58,24 @@ function App() {
       {!isAuthPage && <Navbar />}
 
       <Routes>
-        <Route path="/" element={<HomePage />} />
-
-        <Route
-          path="/category/:categoryName"
-          element={<CategoryProducts />}
-        />
-
-        <Route
-          path="/product/:productId"
-          element={<ProductDetails />}
-        />
-
+        {/* Public authentication pages */}
         <Route path="/login" element={<Login />} />
-
         <Route path="/register" element={<Register />} />
 
+        {/* Protected website pages */}
         <Route element={<ProtectedRoute />}>
+          <Route path="/" element={<HomePage />} />
+
+          <Route
+            path="/category/:categoryName"
+            element={<CategoryProducts />}
+          />
+
+          <Route
+            path="/product/:productId"
+            element={<ProductDetails />}
+          />
+
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/orders" element={<MyOrders />} />
         </Route>
