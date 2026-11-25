@@ -1,68 +1,70 @@
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import api from "../services/api";
-import { useShop } from "../assets/context/useShop";
-import "./CategoryProducts.css";
+import { useDispatch, useSelector } from "react-redux";
 
-function getProductList(data) {
-  if (Array.isArray(data)) return data;
-  if (Array.isArray(data?.results)) return data.results;
-  return [];
-}
+import { fetchProducts } from "../../redux/slices/productsSlice";
+import { useShop } from "../../assets/context/useShop";
+
+import "./CategoryProducts.css";
 
 function CategoryProducts() {
   const { categoryName = "" } = useParams();
+  const dispatch = useDispatch();
 
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const products = useSelector((state) => state.products.items);
+  const status = useSelector((state) => state.products.status);
+  const error = useSelector((state) => state.products.error);
+
   const [sortBy, setSortBy] = useState("-created_at");
 
   const { wishlist, toggleWishlist } = useShop();
 
+  // Fetch products and store them in Redux
   useEffect(() => {
-    let isActive = true;
+    dispatch(fetchProducts());
+  }, [dispatch]);
 
-    const fetchProducts = async () => {
-      try {
-        setLoading(true);
-        setError("");
+  // Filter and sort products using Redux data
+  const filteredProducts = useMemo(() => {
+    const filtered = products.filter(
+      (product) =>
+        product.category?.name?.toLowerCase() ===
+        categoryName.toLowerCase()
+    );
 
-        const response = await api.get(
-          `products/?ordering=${sortBy}`
+    const sorted = [...filtered];
+
+    switch (sortBy) {
+      case "price":
+        sorted.sort(
+          (a, b) => Number(a.price) - Number(b.price)
         );
+        break;
 
-        const allProducts = getProductList(response.data);
-
-        const filteredProducts = allProducts.filter(
-          (product) =>
-            product.category?.name?.toLowerCase() ===
-            categoryName.toLowerCase()
+      case "-price":
+        sorted.sort(
+          (a, b) => Number(b.price) - Number(a.price)
         );
+        break;
 
-        if (isActive) {
-          setProducts(filteredProducts);
-        }
-      } catch (err) {
-        console.error("Category products API Error:", err);
+      case "name":
+        sorted.sort((a, b) =>
+          a.name.localeCompare(b.name)
+        );
+        break;
 
-        if (isActive) {
-          setError("Unable to load products. Please try again.");
-        }
-      } finally {
-        if (isActive) {
-          setLoading(false);
-        }
-      }
-    };
+      default:
+        sorted.sort(
+          (a, b) =>
+            new Date(b.created_at) - new Date(a.created_at)
+        );
+    }
 
-    fetchProducts();
+    return sorted;
+  }, [products, categoryName, sortBy]);
 
-    return () => {
-      isActive = false;
-    };
-  }, [categoryName, sortBy]);
+  const loading = status === "loading";
 
   const pageTitle = categoryName
     ? categoryName.charAt(0).toUpperCase() + categoryName.slice(1)
@@ -91,7 +93,7 @@ function CategoryProducts() {
       </div>
 
       <div className="products-result-info">
-        <span>{products.length} Products</span>
+        <span>{filteredProducts.length} Products</span>
 
         <div className="products-sort">
           <label htmlFor="product-sort">SORT BY</label>
@@ -117,19 +119,21 @@ function CategoryProducts() {
         </p>
       )}
 
-      {error && (
-        <p className="products-message">{error}</p>
+      {status === "failed" && (
+        <p className="products-message">
+          {error || "Unable to load products. Please try again."}
+        </p>
       )}
 
-      {!loading && !error && products.length === 0 && (
+      {!loading && status === "succeeded" && filteredProducts.length === 0 && (
         <p className="products-message">
           No products found in this collection.
         </p>
       )}
 
-      {!loading && !error && products.length > 0 && (
+      {!loading && status === "succeeded" && filteredProducts.length > 0 && (
         <div className="products-grid">
-          {products.map((product) => {
+          {filteredProducts.map((product) => {
             const isWishlisted = wishlist.some(
               (item) => item.id === product.id
             );
@@ -175,8 +179,7 @@ function CategoryProducts() {
 
                 <div className="shop-product-details">
                   <p>
-                    {product.category?.name ||
-                      "QELVORA COLLECTION"}
+                    {product.category?.name || "QELVORA COLLECTION"}
                   </p>
 
                   <Link

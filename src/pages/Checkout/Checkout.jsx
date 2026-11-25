@@ -1,7 +1,6 @@
-
 import { useContext, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import ShopContext from "../assets/context/ShopContext.js";
+import ShopContext from "../../assets/context/ShopContext.js";
 import "./Checkout.css";
 
 function Checkout() {

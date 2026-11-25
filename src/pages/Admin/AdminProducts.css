@@ -1,0 +1,245 @@
+
+.admin-products-page {
+  min-height: 75vh;
+  padding: 55px 6%;
+  background: #f8f7f4;
+  color: #242424;
+}
+
+.admin-products-header {
+  margin-bottom: 35px;
+}
+
+.admin-products-eyebrow {
+  color: #98764b;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 2px;
+}
+
+.admin-products-header h1 {
+  margin: 10px 0;
+  font-size: clamp(28px, 4vw, 40px);
+  font-weight: 500;
+}
+
+.admin-products-header > div > p:last-child,
+.admin-products-section-heading p {
+  color: #777;
+  font-size: 14px;
+}
+
+.admin-products-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+  margin-bottom: 35px;
+}
+
+.admin-products-stats article,
+.admin-product-form-section,
+.admin-products-list-section {
+  background: #fff;
+  border: 1px solid #eae7e1;
+}
+
+.admin-products-stats article {
+  padding: 25px;
+}
+
+.admin-products-stats span {
+  display: block;
+  color: #777;
+  font-size: 13px;
+}
+
+.admin-products-stats strong {
+  display: block;
+  margin-top: 12px;
+  font-size: 30px;
+  font-weight: 500;
+}
+
+.admin-product-form-section,
+.admin-products-list-section {
+  padding: 28px;
+  margin-bottom: 30px;
+}
+
+.admin-products-section-heading {
+  margin-bottom: 24px;
+}
+
+.admin-products-section-heading h2 {
+  font-size: 22px;
+  font-weight: 500;
+}
+
+.admin-product-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.admin-product-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  color: #555;
+  font-size: 13px;
+}
+
+.admin-product-form input,
+.admin-product-form select,
+.admin-product-form textarea {
+  width: 100%;
+  padding: 12px 13px;
+  border: 1px solid #dedbd5;
+  border-radius: 0;
+  outline: none;
+  background: #fff;
+  color: #242424;
+  font: inherit;
+  font-size: 14px;
+}
+
+.admin-product-form input:focus,
+.admin-product-form select:focus,
+.admin-product-form textarea:focus {
+  border-color: #98764b;
+}
+
+.admin-product-form textarea {
+  resize: vertical;
+}
+
+.admin-product-full-field {
+  grid-column: 1 / -1;
+}
+
+.admin-product-form-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.admin-product-form-actions button {
+  padding: 12px 22px;
+  border: 1px solid #242424;
+  background: #242424;
+  color: #fff;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.admin-product-form-actions button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.admin-product-form-actions .admin-product-cancel {
+  background: #fff;
+  color: #242424;
+}
+
+.admin-products-error,
+.admin-products-success {
+  margin-top: 18px;
+  font-size: 13px;
+}
+
+.admin-products-error {
+  color: #b42318;
+}
+
+.admin-products-success {
+  color: #276544;
+}
+
+.admin-products-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.admin-products-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 13px;
+}
+
+.admin-products-table th,
+.admin-products-table td {
+  padding: 16px 12px;
+  border-bottom: 1px solid #eee;
+  white-space: nowrap;
+}
+
+.admin-products-table th {
+  background: #faf9f7;
+  color: #777;
+  font-weight: 500;
+}
+
+.admin-products-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.admin-products-actions button {
+  padding: 8px 13px;
+  border: none;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.admin-products-actions button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.admin-products-edit {
+  background: #eee9df;
+  color: #6c5635;
+}
+
+.admin-products-delete {
+  background: #f5e9e7;
+  color: #9d3939;
+}
+
+.admin-products-message {
+  padding: 20px 0;
+  color: #777;
+}
+
+@media (max-width: 700px) {
+  .admin-products-page {
+    padding: 35px 4%;
+  }
+
+  .admin-products-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-product-form {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-product-full-field {
+    grid-column: auto;
+  }
+
+  .admin-product-form-section,
+  .admin-products-list-section {
+    padding: 18px;
+  }
+}
+.admin-manage-products-link {
+  display: inline-block;
+  margin-top: 18px;
+  padding: 11px 20px;
+  background: #242424;
+  color: #fff;
+  text-decoration: none;
+  font-size: 13px;
+}

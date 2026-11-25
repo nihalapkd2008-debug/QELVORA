@@ -1,8 +1,7 @@
-
 import { useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import api from "../services/api";
-import { useShop } from "../assets/context/useShop";
+import api from "../../services/api";
+import { useShop } from "../../assets/context/useShop";
 import "./Navbar.css";
 
 function getProductList(data) {

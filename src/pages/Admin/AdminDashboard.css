@@ -1,0 +1,181 @@
+
+.admin-dashboard {
+  min-height: 75vh;
+  padding: 55px 6%;
+  background: #f8f7f4;
+  color: #242424;
+}
+
+.admin-header {
+  margin-bottom: 35px;
+}
+
+.admin-eyebrow {
+  color: #98764b;
+  font-size: 11px;
+  letter-spacing: 2px;
+  font-weight: 600;
+}
+
+.admin-header h1 {
+  margin: 10px 0;
+  font-size: clamp(28px, 4vw, 40px);
+  font-weight: 500;
+}
+
+.admin-header p:last-child,
+.admin-section-heading p {
+  color: #777;
+  font-size: 14px;
+}
+
+.admin-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+  margin-bottom: 40px;
+}
+
+.admin-stat-card {
+  padding: 25px;
+  background: #fff;
+  border: 1px solid #eae7e1;
+}
+
+.admin-stat-card span {
+  display: block;
+  color: #777;
+  font-size: 13px;
+}
+
+.admin-stat-card strong {
+  display: block;
+  margin-top: 12px;
+  font-size: 30px;
+  font-weight: 500;
+}
+
+.admin-users-section {
+  padding: 28px;
+  background: #fff;
+  border: 1px solid #eae7e1;
+}
+
+.admin-section-heading {
+  margin-bottom: 24px;
+}
+
+.admin-section-heading h2 {
+  font-size: 22px;
+  font-weight: 500;
+}
+
+.admin-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.admin-users-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 13px;
+}
+
+.admin-users-table th,
+.admin-users-table td {
+  padding: 16px 12px;
+  border-bottom: 1px solid #eee;
+  white-space: nowrap;
+}
+
+.admin-users-table th {
+  color: #777;
+  font-weight: 500;
+  background: #faf9f7;
+}
+
+.admin-status {
+  display: inline-block;
+  padding: 6px 11px;
+  font-size: 11px;
+  border-radius: 20px;
+}
+
+.admin-status.active {
+  color: #276544;
+  background: #e8f4ec;
+}
+
+.admin-status.blocked {
+  color: #a33e3e;
+  background: #fbeaea;
+}
+
+.admin-action-button {
+  padding: 8px 15px;
+  border: none;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.admin-action-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.block-button {
+  background: #f5e9e7;
+  color: #9d3939;
+}
+
+.unblock-button {
+  background: #e8f3eb;
+  color: #276544;
+}
+
+.admin-message {
+  color: #777;
+  padding: 20px 0;
+}
+
+.admin-error {
+  color: #b42318;
+  padding: 15px 0;
+}
+
+@media (max-width: 700px) {
+  .admin-dashboard {
+    padding: 35px 4%;
+  }
+
+  .admin-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-users-section {
+    padding: 16px;
+  }
+}
+.admin-protected {
+  color: #98764b;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.admin-manage-products-link {
+  display: inline-block !important;
+  margin-top: 20px;
+  padding: 12px 24px;
+  background-color: #242424;
+  color: #ffffff !important;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.admin-manage-products-link:hover {
+  background-color: #98764b;
+}

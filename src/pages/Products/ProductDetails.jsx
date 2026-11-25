@@ -1,54 +1,48 @@
 
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import api from "../services/api";
-import { useShop } from "../assets/context/useShop";
+import { useDispatch, useSelector } from "react-redux";
+
+import { fetchProducts } from "../../redux/slices/productsSlice";
+import { useShop } from "../../assets/context/useShop";
+
 import "./ProductDetails.css";
 
 function ProductDetails() {
   const { productId } = useParams();
+  const dispatch = useDispatch();
 
-  const [product, setProduct] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [quantity, setQuantity] = useState(1);
+  const products = useSelector((state) => state.products.items);
+  const status = useSelector((state) => state.products.status);
+  const error = useSelector((state) => state.products.error);
+
+  const [quantities, setQuantities] = useState({});
   const [added, setAdded] = useState(false);
 
   const { wishlist, toggleWishlist, addToCart } = useShop();
 
+  // Fetch products if Redux store is empty
   useEffect(() => {
-    let isActive = true;
+    if (status === "idle") {
+      dispatch(fetchProducts());
+    }
+  }, [dispatch, status]);
 
-    const fetchProduct = async () => {
-      try {
-        setLoading(true);
-        setError("");
+  // Find the selected product from Redux store
+  const product = products.find(
+    (item) => String(item.id) === productId
+  );
 
-        const response = await api.get(`products/${productId}/`);
+  const quantity = quantities[productId] || 1;
 
-        if (isActive) {
-          setProduct(response.data);
-          setQuantity(1);
-        }
-      } catch (err) {
-        console.error("Product Details API Error:", err);
+  const updateQuantity = (newQuantity) => {
+    setQuantities((current) => ({
+      ...current,
+      [productId]: newQuantity,
+    }));
+  };
 
-        if (isActive) {
-          setError("Unable to load this product. Please try again.");
-        }
-      } finally {
-        if (isActive) {
-          setLoading(false);
-        }
-      }
-    };
-
-    fetchProduct();
-
-    return () => {
-      isActive = false;
-    };
-  }, [productId]);
+  const loading = status === "idle" || status === "loading";
 
   const formatPrice = (price) =>
     `₹${Number(price || 0).toLocaleString("en-IN")}`;
@@ -69,7 +63,6 @@ function ProductDetails() {
       setTimeout(() => setAdded(false), 9000);
     } catch (err) {
       console.error("Add to Bag Error:", err);
-      setError("Unable to add this product to your bag.");
     }
   };
 
@@ -83,11 +76,13 @@ function ProductDetails() {
     );
   }
 
-  if (error || !product) {
+  if (status === "failed" || !product) {
     return (
       <main className="product-details-page" data-navbar-theme="light">
         <p className="product-details-message">
-          {error || "Product not found."}
+          {status === "failed"
+            ? error || "Unable to load this product."
+            : "Product not found."}
         </p>
 
         <Link to="/" className="back-to-shop">
@@ -105,11 +100,15 @@ function ProductDetails() {
       <div className="product-details-breadcrumb">
         <Link to="/">HOME</Link>
         <span>/</span>
-        <Link to={`/category/${encodeURIComponent(
-          product.category?.name || ""
-        )}`}>
+
+        <Link
+          to={`/category/${encodeURIComponent(
+            product.category?.name || ""
+          )}`}
+        >
           {product.category?.name || "COLLECTION"}
         </Link>
+
         <span>/</span>
         <span>{product.name}</span>
       </div>
@@ -161,9 +160,7 @@ function ProductDetails() {
                   <button
                     type="button"
                     onClick={() =>
-                      setQuantity((current) =>
-                        Math.max(1, current - 1)
-                      )
+                      updateQuantity(Math.max(1, quantity - 1))
                     }
                     disabled={quantity <= 1}
                     aria-label="Decrease quantity"
@@ -176,8 +173,8 @@ function ProductDetails() {
                   <button
                     type="button"
                     onClick={() =>
-                      setQuantity((current) =>
-                        Math.min(product.stock, current + 1)
+                      updateQuantity(
+                        Math.min(product.stock, quantity + 1)
                       )
                     }
                     disabled={quantity >= product.stock}

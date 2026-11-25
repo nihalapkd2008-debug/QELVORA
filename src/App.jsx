@@ -1,48 +1,25 @@
 
-import { useEffect } from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
 
-import AnnouncementBar from "./components/AnnouncementBar";
-import Navbar from "./components/Navbar";
-import Hero from "./components/Hero";
-import CategorySection from "./components/CategorySection";
-import NewArrivals from "./components/NewArrivals";
-import BrandStory from "./components/BrandStory";
-import BenefitsSection from "./components/BenefitsSection";
-import StyleMarquee from "./components/StyleMarquee";
-import CategoryProducts from "./components/CategoryProducts";
-import MyOrders from "./pages/MyOrders";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-import ProductDetails from "./pages/ProductDetails";
-import ProtectedRoute from "./components/ProtectedRoute";
-import Checkout from "./pages/Checkout";
-import Footer from "./components/Footer";
+import Navbar from "./components/Navbar/Navbar.jsx";
+import Footer from "./components/Footer.jsx";
+import ProtectedRoute from "./components/ProtectedRoute.jsx";
+
+import HomePage from "./pages/Home/HomePage.jsx";
+import CategoryProducts from "./pages/Products/CategoryProducts.jsx";
+import ProductDetails from "./pages/Products/ProductDetails.jsx";
+
+import AdminDashboard from "./pages/Admin/AdminDashboard.jsx";
+import AdminProducts from "./pages/Admin/AdminProducts.jsx";
+import VendorDashboard from "./pages/Vendor/VendorDashboard.jsx";
+
+import Login from "./pages/Auth/Login.jsx";
+import Register from "./pages/Auth/Register.jsx";
+import Checkout from "./pages/Checkout/Checkout.jsx";
+import MyOrders from "./pages/Orders/MyOrders.jsx";
+
 import { ShopProvider } from "./assets/context/ShopContext.jsx";
-
-function HomePage() {
-  return (
-    <>
-      <AnnouncementBar />
-      <Hero />
-      <CategorySection />
-      <NewArrivals />
-      <BrandStory />
-      <BenefitsSection />
-      <StyleMarquee />
-    </>
-  );
-}
-
-function ScrollToTop() {
-  const { pathname } = useLocation();
-
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [pathname]);
-
-  return null;
-}
+import ScrollToTop from "./layouts/ScrollToTop.jsx";
 
 function App() {
   const location = useLocation();
@@ -62,7 +39,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
-        {/* Protected website pages */}
+        {/* All authenticated users */}
         <Route element={<ProtectedRoute />}>
           <Route path="/" element={<HomePage />} />
 
@@ -75,7 +52,21 @@ function App() {
             path="/product/:productId"
             element={<ProductDetails />}
           />
+        </Route>
 
+        {/* Admin only */}
+        <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
+          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin/products" element={<AdminProducts />} />
+        </Route>
+
+        {/* Approved Vendor only */}
+        <Route element={<ProtectedRoute allowedRoles={["vendor"]} />}>
+          <Route path="/vendor" element={<VendorDashboard />} />
+        </Route>
+
+        {/* Customer only */}
+        <Route element={<ProtectedRoute allowedRoles={["customer"]} />}>
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/orders" element={<MyOrders />} />
         </Route>
