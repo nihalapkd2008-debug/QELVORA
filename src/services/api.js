@@ -6,6 +6,9 @@ const api = axios.create({
   timeout: 10000,
 });
 
+// Shared refresh request prevents duplicate token refresh calls
+let refreshPromise = null;
+
 // Attach access token to every request
 api.interceptors.request.use(
   (config) => {
@@ -28,71 +31,85 @@ api.interceptors.response.use(
     const originalRequest = error.config;
 
     if (
-      error.response?.status === 401 &&
-      originalRequest &&
-      !originalRequest._retry &&
-      !originalRequest.url?.includes("auth/login/") &&
-      !originalRequest.url?.includes("auth/refresh/")
-    ) {
-      originalRequest._retry = true;
+  error.response?.status !== 401 ||
+  !originalRequest ||
+  originalRequest._retry ||
+  originalRequest.url?.includes("auth/login/") ||
+  originalRequest.url?.includes("auth/refresh/") ||
+  originalRequest.url?.includes("accounts/google-login/")
+) {
+  return Promise.reject(error);
+}
 
-      const refreshToken = localStorage.getItem("refresh_token");
+    originalRequest._retry = true;
 
-      if (!refreshToken) {
-        localStorage.removeItem("access_token");
-        localStorage.removeItem("refresh_token");
+    const refreshToken = localStorage.getItem("refresh_token");
 
-        window.dispatchEvent(new Event("auth-changed"));
+    if (!refreshToken) {
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("refresh_token");
 
-        window.location.href = "/login";
+      window.dispatchEvent(new Event("auth-changed"));
+      window.location.href = "/login";
 
-        return Promise.reject(error);
-      }
-
-      try {
-        // Request a new access token
-        const response = await axios.post(
-          "/api/auth/refresh/",
-          {
-            refresh: refreshToken,
-          }
-        );
-
-        const newAccessToken = response.data.access;
-
-        localStorage.setItem("access_token", newAccessToken);
-
-        // Save rotated refresh token if provided
-        if (response.data.refresh) {
-          localStorage.setItem(
-            "refresh_token",
-            response.data.refresh
-          );
-        }
-
-        // Retry the original request with the new token
-        originalRequest.headers = originalRequest.headers || {};
-
-        originalRequest.headers.Authorization =
-          `Bearer ${newAccessToken}`;
-
-        return api(originalRequest);
-
-      } catch (refreshError) {
-        console.error("Token refresh failed:", refreshError);
-
-        localStorage.removeItem("access_token");
-        localStorage.removeItem("refresh_token");
-
-        window.dispatchEvent(new Event("auth-changed"));
-
-        window.location.href = "/login";
-
-        return Promise.reject(refreshError);
-      }
+      return Promise.reject(error);
     }
 
-    return Promise.reject(error);
+    try {
+      // Reuse an existing refresh request if one is running
+      if (!refreshPromise) {
+        refreshPromise = axios
+          .post("/api/auth/refresh/", {
+            refresh: refreshToken,
+          })
+          .then((response) => {
+            const newAccessToken = response.data.access;
+
+            if (!newAccessToken) {
+              throw new Error("Access token missing from refresh response.");
+            }
+
+            localStorage.setItem(
+              "access_token",
+              newAccessToken
+            );
+
+            // Save rotated refresh token if provided
+            if (response.data.refresh) {
+              localStorage.setItem(
+                "refresh_token",
+                response.data.refresh
+              );
+            }
+
+            return newAccessToken;
+          })
+          .finally(() => {
+            refreshPromise = null;
+          });
+      }
+
+      const newAccessToken = await refreshPromise;
+
+      // Retry original request using the new token
+      originalRequest.headers = originalRequest.headers || {};
+
+      originalRequest.headers.Authorization =
+        `Bearer ${newAccessToken}`;
+
+      return api(originalRequest);
+
+    } catch (refreshError) {
+      console.error("Token refresh failed:", refreshError);
+
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("refresh_token");
+
+      window.dispatchEvent(new Event("auth-changed"));
+      window.location.href = "/login";
+
+      return Promise.reject(refreshError);
+    }
   }
 );
 

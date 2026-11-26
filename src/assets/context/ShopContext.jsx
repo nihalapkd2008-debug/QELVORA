@@ -2,6 +2,7 @@
 import {
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
@@ -9,14 +10,25 @@ import {
 import ShopContext from "./ShopContext.js";
 import api from "../../services/api";
 
+// Check authentication status
+function isLoggedIn() {
+  return Boolean(localStorage.getItem("access_token"));
+}
+
+// Get guest cart from localStorage
 function getLocalCart() {
   try {
-    return JSON.parse(localStorage.getItem("qelvora-cart")) || [];
+    const cart = JSON.parse(
+      localStorage.getItem("qelvora-cart")
+    );
+
+    return Array.isArray(cart) ? cart : [];
   } catch {
     return [];
   }
 }
 
+// Format backend cart items
 function formatCartItems(items = []) {
   return items.map((item) => ({
     ...item.product,
@@ -28,9 +40,11 @@ function formatCartItems(items = []) {
 export function ShopProvider({ children }) {
   const [wishlist, setWishlist] = useState(() => {
     try {
-      return (
-        JSON.parse(localStorage.getItem("qelvora-wishlist")) || []
+      const savedWishlist = JSON.parse(
+        localStorage.getItem("qelvora-wishlist")
       );
+
+      return Array.isArray(savedWishlist) ? savedWishlist : [];
     } catch {
       return [];
     }
@@ -39,11 +53,8 @@ export function ShopProvider({ children }) {
   const [cart, setCart] = useState(getLocalCart);
   const [isCartLoading, setIsCartLoading] = useState(false);
 
-  // Prevent duplicate cart loading requests
+  // Prevent duplicate simultaneous cart requests
   const cartLoadPromiseRef = useRef(null);
-
-  const isLoggedIn = () =>
-    Boolean(localStorage.getItem("access_token"));
 
   // Save wishlist
   useEffect(() => {
@@ -67,7 +78,6 @@ export function ShopProvider({ children }) {
   const loadBackendCart = useCallback(async () => {
     if (!isLoggedIn()) return;
 
-    // Avoid duplicate simultaneous requests
     if (cartLoadPromiseRef.current) {
       return cartLoadPromiseRef.current;
     }
@@ -99,7 +109,6 @@ export function ShopProvider({ children }) {
           }
         }
 
-        // Fetch updated cart after merging
         response = await api.get("cart/");
         backendItems = response.data.items || [];
 
@@ -140,17 +149,17 @@ export function ShopProvider({ children }) {
     };
   }, [loadBackendCart]);
 
-  // Wishlist
-  const toggleWishlist = (product) => {
+  // Add or remove products from wishlist
+  const toggleWishlist = useCallback((product) => {
     setWishlist((current) =>
       current.some((item) => item.id === product.id)
         ? current.filter((item) => item.id !== product.id)
         : [...current, product]
     );
-  };
+  }, []);
 
   // Add product to cart
-  const addToCart = async (product) => {
+  const addToCart = useCallback(async (product) => {
     if (!isLoggedIn()) {
       setCart((current) => {
         const existing = current.find(
@@ -188,18 +197,17 @@ export function ShopProvider({ children }) {
 
       throw error;
     }
-  };
+  }, [loadBackendCart]);
 
-  // Update quantity
-  const updateQuantity = async (productId, change) => {
+  // Update product quantity
+  const updateQuantity = useCallback(async (productId, change) => {
     const item = cart.find(
       (product) => product.id === productId
     );
 
     if (!item) return;
 
-    // Do not allow quantity below 1
-    // No API request when quantity is already 1
+    // Prevent quantity from going below 1
     if (change < 0 && item.quantity <= 1) {
       return;
     }
@@ -209,7 +217,7 @@ export function ShopProvider({ children }) {
       item.quantity + change
     );
 
-    // Guest cart
+    // Update guest cart
     if (!isLoggedIn()) {
       setCart((current) =>
         current.map((product) =>
@@ -247,10 +255,10 @@ export function ShopProvider({ children }) {
         "Unable to update quantity."
       );
     }
-  };
+  }, [cart, loadBackendCart]);
 
-  // Remove product
-  const removeFromCart = async (productId) => {
+  // Remove product from cart
+  const removeFromCart = useCallback(async (productId) => {
     if (!isLoggedIn()) {
       setCart((current) =>
         current.filter((item) => item.id !== productId)
@@ -286,10 +294,10 @@ export function ShopProvider({ children }) {
         "Unable to remove product."
       );
     }
-  };
+  }, [cart, loadBackendCart]);
 
-  // Place order
-  const placeOrder = async () => {
+  // Place customer order
+  const placeOrder = useCallback(async () => {
     if (!isLoggedIn()) {
       throw new Error("Please login to place your order.");
     }
@@ -301,7 +309,6 @@ export function ShopProvider({ children }) {
     try {
       const response = await api.post("orders/");
 
-      // Clear cart after successful order
       setCart([]);
       localStorage.removeItem("qelvora-cart");
 
@@ -315,36 +322,57 @@ export function ShopProvider({ children }) {
         { cause: error }
       );
     }
-  };
+  }, [cart]);
 
-  // Cart quantity
-  const cartCount = cart.reduce(
-    (total, item) => total + item.quantity,
-    0
+  // Calculate cart quantity
+  const cartCount = useMemo(
+    () => cart.reduce(
+      (total, item) => total + item.quantity,
+      0
+    ),
+    [cart]
   );
 
-  // Cart total
-  const cartTotal = cart.reduce(
-    (total, item) =>
-      total + Number(item.price || 0) * item.quantity,
-    0
+  // Calculate cart total
+  const cartTotal = useMemo(
+    () => cart.reduce(
+      (total, item) =>
+        total + Number(item.price || 0) * item.quantity,
+      0
+    ),
+    [cart]
+  );
+
+  // Memoize context value
+  const contextValue = useMemo(
+    () => ({
+      wishlist,
+      cart,
+      cartCount,
+      cartTotal,
+      isCartLoading,
+      toggleWishlist,
+      addToCart,
+      updateQuantity,
+      removeFromCart,
+      placeOrder,
+    }),
+    [
+      wishlist,
+      cart,
+      cartCount,
+      cartTotal,
+      isCartLoading,
+      toggleWishlist,
+      addToCart,
+      updateQuantity,
+      removeFromCart,
+      placeOrder,
+    ]
   );
 
   return (
-    <ShopContext.Provider
-      value={{
-        wishlist,
-        cart,
-        cartCount,
-        cartTotal,
-        isCartLoading,
-        toggleWishlist,
-        addToCart,
-        updateQuantity,
-        removeFromCart,
-        placeOrder,
-      }}
-    >
+    <ShopContext.Provider value={contextValue}>
       {children}
     </ShopContext.Provider>
   );

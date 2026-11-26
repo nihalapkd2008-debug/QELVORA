@@ -22,8 +22,10 @@ function CategoryProducts() {
 
   // Fetch products and store them in Redux
   useEffect(() => {
+  if (status === "idle") {
     dispatch(fetchProducts());
-  }, [dispatch]);
+  }
+}, [dispatch, status]);
 
   // Filter and sort products using Redux data
   const filteredProducts = useMemo(() => {

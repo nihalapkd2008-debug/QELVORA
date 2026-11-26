@@ -13,6 +13,8 @@ const initialForm = {
   image: "",
 };
 
+const PAGE_SIZE = 10;
+
 function AdminProducts() {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -22,32 +24,73 @@ function AdminProducts() {
   const [editingId, setEditingId] = useState(null);
 
   const [loading, setLoading] = useState(true);
+  const [pageLoading, setPageLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [updatingId, setUpdatingId] = useState(null);
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalProducts, setTotalProducts] = useState(0);
+  const [totalStock, setTotalStock] = useState(0);
+  const [outOfStock, setOutOfStock] = useState(0);
 
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
 
+  const totalPages = Math.ceil(totalProducts / PAGE_SIZE);
+
+  // Fetch products when navigating between pages
+  const fetchProducts = async (page = 1) => {
+    setPageLoading(true);
+
+    try {
+      const response = await api.get("admin/products/", {
+        params: {
+          page,
+          page_size: PAGE_SIZE,
+        },
+      });
+
+      const data = response.data;
+
+      setProducts(data.results || []);
+      setTotalProducts(data.count || 0);
+      setTotalStock(data.total_stock || 0);
+      setOutOfStock(data.out_of_stock || 0);
+      setCurrentPage(page);
+    } catch {
+      setError("Unable to load products. Please try again.");
+    } finally {
+      setPageLoading(false);
+    }
+  };
+
+  // Load initial products, categories and vendors
   useEffect(() => {
-    let isMounted = true;
+    const loadInitialData = async () => {
+      try {
+        const [productResponse, categoryResponse, userResponse] =
+          await Promise.all([
+            api.get("admin/products/", {
+              params: {
+                page: 1,
+                page_size: PAGE_SIZE,
+              },
+            }),
+            api.get("categories/"),
+            api.get("accounts/admin/users/"),
+          ]);
 
-    Promise.all([
-      api.get("admin/products/"),
-      api.get("categories/"),
-      api.get("accounts/admin/users/"),
-    ])
-      .then(([productResponse, categoryResponse, userResponse]) => {
-        if (!isMounted) return;
-
+        // Set initial products and pagination details
         const productData = productResponse.data;
-        const categoryData = categoryResponse.data;
-        const userData = userResponse.data;
 
-        setProducts(
-          Array.isArray(productData)
-            ? productData
-            : productData.results || []
-        );
+        setProducts(productData.results || []);
+        setTotalProducts(productData.count || 0);
+        setTotalStock(productData.total_stock || 0);
+        setOutOfStock(productData.out_of_stock || 0);
+        setCurrentPage(1);
+
+        // Set categories
+        const categoryData = categoryResponse.data;
 
         setCategories(
           Array.isArray(categoryData)
@@ -55,31 +98,29 @@ function AdminProducts() {
             : categoryData.results || []
         );
 
-        const approvedVendors = (
-          Array.isArray(userData) ? userData : userData.results || []
-        ).filter(
-          (user) =>
-            user.role === "vendor" &&
-            user.vendor_status === "approved" &&
-            !user.is_staff
+        // Filter approved vendors
+        const userData = userResponse.data;
+
+        const users = Array.isArray(userData)
+          ? userData
+          : userData.results || [];
+
+        setVendors(
+          users.filter(
+            (user) =>
+              user.role === "vendor" &&
+              user.vendor_status === "approved" &&
+              !user.is_staff
+          )
         );
-
-        setVendors(approvedVendors);
-      })
-      .catch(() => {
-        if (isMounted) {
-          setError("Unable to load admin product data.");
-        }
-      })
-      .finally(() => {
-        if (isMounted) {
-          setLoading(false);
-        }
-      });
-
-    return () => {
-      isMounted = false;
+      } catch {
+        setError("Unable to load admin product data.");
+      } finally {
+        setLoading(false);
+      }
     };
+
+    loadInitialData();
   }, []);
 
   const handleChange = (event) => {
@@ -96,6 +137,7 @@ function AdminProducts() {
     setEditingId(null);
   };
 
+  // Add or update product
   const handleSubmit = async (event) => {
     event.preventDefault();
 
@@ -119,18 +161,17 @@ function AdminProducts() {
           `admin/products/${editingId}/`,
           productData
         );
+
         setMessage("Product updated successfully.");
+
+        await fetchProducts(currentPage);
       } else {
         await api.post("admin/products/", productData);
+
         setMessage("Product added successfully.");
+
+        await fetchProducts(1);
       }
-
-      const response = await api.get("admin/products/");
-      const data = response.data;
-
-      setProducts(
-        Array.isArray(data) ? data : data.results || []
-      );
 
       resetForm();
     } catch (err) {
@@ -143,6 +184,7 @@ function AdminProducts() {
     }
   };
 
+  // Edit product
   const handleEdit = (product) => {
     setEditingId(product.id);
 
@@ -159,9 +201,13 @@ function AdminProducts() {
     setError("");
     setMessage("");
 
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
   };
 
+  // Delete product
   const handleDelete = async (productId) => {
     const confirmed = window.confirm(
       "Are you sure you want to delete this product?"
@@ -176,12 +222,16 @@ function AdminProducts() {
     try {
       await api.delete(`admin/products/${productId}/`);
 
-      setProducts((previous) =>
-        previous.filter((product) => product.id !== productId)
-      );
-
       if (editingId === productId) {
         resetForm();
+      }
+
+      const remainingOnPage = products.length - 1;
+
+      if (remainingOnPage === 0 && currentPage > 1) {
+        await fetchProducts(currentPage - 1);
+      } else {
+        await fetchProducts(currentPage);
       }
 
       setMessage("Product deleted successfully.");
@@ -192,6 +242,7 @@ function AdminProducts() {
     }
   };
 
+  // Get category name
   const getCategoryName = (categoryId) => {
     const category = categories.find(
       (item) => item.id === categoryId
@@ -200,6 +251,7 @@ function AdminProducts() {
     return category?.name || "Unknown";
   };
 
+  // Get vendor name
   const getVendorName = (vendorId) => {
     if (!vendorId) return "Admin";
 
@@ -210,9 +262,28 @@ function AdminProducts() {
     return vendor?.username || `User #${vendorId}`;
   };
 
-  const totalStock = products.reduce(
-    (total, product) => total + Number(product.stock || 0),
-    0
+  // Generate visible page numbers
+  const firstPage = Math.max(
+    1,
+    Math.min(currentPage - 2, totalPages - 4)
+  );
+
+  const lastPage = Math.min(totalPages, firstPage + 4);
+
+  const pageNumbers = Array.from(
+    { length: lastPage - firstPage + 1 },
+    (_, index) => firstPage + index
+  );
+
+  // Calculate displayed product range
+  const firstItem =
+    totalProducts === 0
+      ? 0
+      : (currentPage - 1) * PAGE_SIZE + 1;
+
+  const lastItem = Math.min(
+    currentPage * PAGE_SIZE,
+    totalProducts
   );
 
   return (
@@ -222,15 +293,18 @@ function AdminProducts() {
           <p className="admin-products-eyebrow">
             QELVORA MANAGEMENT
           </p>
+
           <h1>Product Management</h1>
+
           <p>Manage the products available in your store.</p>
         </div>
       </header>
 
+      {/* Product Statistics */}
       <section className="admin-products-stats">
         <article>
           <span>Total Products</span>
-          <strong>{products.length}</strong>
+          <strong>{totalProducts}</strong>
         </article>
 
         <article>
@@ -240,17 +314,17 @@ function AdminProducts() {
 
         <article>
           <span>Out of Stock</span>
-          <strong>
-            {products.filter(
-              (product) => Number(product.stock) === 0
-            ).length}
-          </strong>
+          <strong>{outOfStock}</strong>
         </article>
       </section>
 
+      {/* Add / Edit Product Form */}
       <section className="admin-product-form-section">
         <div className="admin-products-section-heading">
-          <h2>{editingId ? "Edit Product" : "Add New Product"}</h2>
+          <h2>
+            {editingId ? "Edit Product" : "Add New Product"}
+          </h2>
+
           <p>
             {editingId
               ? "Update the selected product details."
@@ -283,6 +357,7 @@ function AdminProducts() {
               required
             >
               <option value="">Select category</option>
+
               {categories.map((category) => (
                 <option key={category.id} value={category.id}>
                   {category.name}
@@ -299,6 +374,7 @@ function AdminProducts() {
               onChange={handleChange}
             >
               <option value="">Admin-owned product</option>
+
               {vendors.map((vendor) => (
                 <option key={vendor.id} value={vendor.id}>
                   {vendor.username}
@@ -379,12 +455,16 @@ function AdminProducts() {
           </div>
         </form>
 
-        {error && <p className="admin-products-error">{error}</p>}
+        {error && (
+          <p className="admin-products-error">{error}</p>
+        )}
+
         {message && (
           <p className="admin-products-success">{message}</p>
         )}
       </section>
 
+      {/* Products Table */}
       <section className="admin-products-list-section">
         <div className="admin-products-section-heading">
           <h2>All Products</h2>
@@ -392,66 +472,132 @@ function AdminProducts() {
         </div>
 
         {loading && (
-          <p className="admin-products-message">Loading products...</p>
+          <p className="admin-products-message">
+            Loading products...
+          </p>
         )}
 
-        {!loading && !error && products.length === 0 && (
-          <p className="admin-products-message">No products found.</p>
+        {!loading && products.length === 0 && (
+          <p className="admin-products-message">
+            No products found.
+          </p>
         )}
 
         {!loading && products.length > 0 && (
-          <div className="admin-products-table-wrapper">
-            <table className="admin-products-table">
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Product</th>
-                  <th>Category</th>
-                  <th>Price</th>
-                  <th>Stock</th>
-                  <th>Owner</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {products.map((product) => (
-                  <tr key={product.id}>
-                    <td>#{product.id}</td>
-                    <td>{product.name}</td>
-                    <td>{getCategoryName(product.category)}</td>
-                    <td>
-                      ₹{Number(product.price).toLocaleString("en-IN")}
-                    </td>
-                    <td>{product.stock}</td>
-                    <td>{getVendorName(product.vendor)}</td>
-                    <td>
-                      <div className="admin-products-actions">
-                        <button
-                          type="button"
-                          className="admin-products-edit"
-                          onClick={() => handleEdit(product)}
-                        >
-                          Edit
-                        </button>
-
-                        <button
-                          type="button"
-                          className="admin-products-delete"
-                          disabled={updatingId === product.id}
-                          onClick={() => handleDelete(product.id)}
-                        >
-                          {updatingId === product.id
-                            ? "Deleting..."
-                            : "Delete"}
-                        </button>
-                      </div>
-                    </td>
+          <>
+            <div className="admin-products-table-wrapper">
+              <table className="admin-products-table">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Product</th>
+                    <th>Category</th>
+                    <th>Price</th>
+                    <th>Stock</th>
+                    <th>Owner</th>
+                    <th>Actions</th>
                   </tr>
+                </thead>
+
+                <tbody>
+                  {products.map((product) => (
+                    <tr key={product.id}>
+                      <td>#{product.id}</td>
+
+                      <td>{product.name}</td>
+
+                      <td>
+                        {getCategoryName(product.category)}
+                      </td>
+
+                      <td>
+                        ₹
+                        {Number(product.price).toLocaleString(
+                          "en-IN"
+                        )}
+                      </td>
+
+                      <td>{product.stock}</td>
+
+                      <td>
+                        {getVendorName(product.vendor)}
+                      </td>
+
+                      <td>
+                        <div className="admin-products-actions">
+                          <button
+                            type="button"
+                            className="admin-products-edit"
+                            onClick={() => handleEdit(product)}
+                          >
+                            Edit
+                          </button>
+
+                          <button
+                            type="button"
+                            className="admin-products-delete"
+                            disabled={updatingId === product.id}
+                            onClick={() => handleDelete(product.id)}
+                          >
+                            {updatingId === product.id
+                              ? "Deleting..."
+                              : "Delete"}
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Pagination */}
+            <div className="admin-products-pagination">
+              <p className="admin-products-pagination-info">
+                Showing <strong>{firstItem}-{lastItem}</strong>{" "}
+                of <strong>{totalProducts}</strong> products
+              </p>
+
+              <div className="admin-products-pagination-controls">
+                <button
+                  type="button"
+                  className="admin-products-page-button"
+                  disabled={currentPage === 1 || pageLoading}
+                  onClick={() => fetchProducts(currentPage - 1)}
+                >
+                  Previous
+                </button>
+
+                {pageNumbers.map((page) => (
+                  <button
+                    type="button"
+                    key={page}
+                    className={`admin-products-page-button ${
+                      currentPage === page ? "active" : ""
+                    }`}
+                    disabled={pageLoading}
+                    onClick={() => fetchProducts(page)}
+                    aria-current={
+                      currentPage === page ? "page" : undefined
+                    }
+                  >
+                    {page}
+                  </button>
                 ))}
-              </tbody>
-            </table>
-          </div>
+
+                <button
+                  type="button"
+                  className="admin-products-page-button"
+                  disabled={
+                    currentPage >= totalPages || pageLoading
+                  }
+                  onClick={() => fetchProducts(currentPage + 1)}
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          </>
         )}
       </section>
     </main>
