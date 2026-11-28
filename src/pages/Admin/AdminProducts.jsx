@@ -22,6 +22,7 @@ function AdminProducts() {
 
   const [form, setForm] = useState(initialForm);
   const [editingId, setEditingId] = useState(null);
+  const [showForm, setShowForm] = useState(false);
 
   const [loading, setLoading] = useState(true);
   const [pageLoading, setPageLoading] = useState(false);
@@ -80,7 +81,6 @@ function AdminProducts() {
             api.get("accounts/admin/users/"),
           ]);
 
-        // Set initial products and pagination details
         const productData = productResponse.data;
 
         setProducts(productData.results || []);
@@ -89,7 +89,6 @@ function AdminProducts() {
         setOutOfStock(productData.out_of_stock || 0);
         setCurrentPage(1);
 
-        // Set categories
         const categoryData = categoryResponse.data;
 
         setCategories(
@@ -98,7 +97,6 @@ function AdminProducts() {
             : categoryData.results || []
         );
 
-        // Filter approved vendors
         const userData = userResponse.data;
 
         const users = Array.isArray(userData)
@@ -135,6 +133,7 @@ function AdminProducts() {
   const resetForm = () => {
     setForm(initialForm);
     setEditingId(null);
+    setShowForm(false);
   };
 
   // Add or update product
@@ -163,13 +162,11 @@ function AdminProducts() {
         );
 
         setMessage("Product updated successfully.");
-
         await fetchProducts(currentPage);
       } else {
         await api.post("admin/products/", productData);
 
         setMessage("Product added successfully.");
-
         await fetchProducts(1);
       }
 
@@ -200,11 +197,25 @@ function AdminProducts() {
 
     setError("");
     setMessage("");
+    setShowForm(true);
 
     window.scrollTo({
       top: 0,
       behavior: "smooth",
     });
+  };
+
+  // Toggle Add Product form
+  const handleFormToggle = () => {
+    if (showForm) {
+      resetForm();
+    } else {
+      setForm(initialForm);
+      setEditingId(null);
+      setError("");
+      setMessage("");
+      setShowForm(true);
+    }
   };
 
   // Delete product
@@ -298,6 +309,14 @@ function AdminProducts() {
 
           <p>Manage the products available in your store.</p>
         </div>
+
+        <button
+          type="button"
+          className="admin-add-product-toggle"
+          onClick={handleFormToggle}
+        >
+          {showForm ? "− Close Form" : "+ Add New Product"}
+        </button>
       </header>
 
       {/* Product Statistics */}
@@ -319,152 +338,155 @@ function AdminProducts() {
       </section>
 
       {/* Add / Edit Product Form */}
-      <section className="admin-product-form-section">
-        <div className="admin-products-section-heading">
-          <h2>
-            {editingId ? "Edit Product" : "Add New Product"}
-          </h2>
+      {showForm && (
+        <section className="admin-product-form-section">
+          <div className="admin-products-section-heading">
+            <h2>
+              {editingId ? "Edit Product" : "Add New Product"}
+            </h2>
 
-          <p>
-            {editingId
-              ? "Update the selected product details."
-              : "Add a product to the QELVORA catalogue."}
-          </p>
-        </div>
-
-        <form
-          className="admin-product-form"
-          onSubmit={handleSubmit}
-        >
-          <label>
-            Product Name
-            <input
-              type="text"
-              name="name"
-              value={form.name}
-              onChange={handleChange}
-              placeholder="Enter product name"
-              required
-            />
-          </label>
-
-          <label>
-            Category
-            <select
-              name="category"
-              value={form.category}
-              onChange={handleChange}
-              required
-            >
-              <option value="">Select category</option>
-
-              {categories.map((category) => (
-                <option key={category.id} value={category.id}>
-                  {category.name}
-                </option>
-              ))}
-            </select>
-          </label>
-
-          <label>
-            Vendor
-            <select
-              name="vendor"
-              value={form.vendor}
-              onChange={handleChange}
-            >
-              <option value="">Admin-owned product</option>
-
-              {vendors.map((vendor) => (
-                <option key={vendor.id} value={vendor.id}>
-                  {vendor.username}
-                </option>
-              ))}
-            </select>
-          </label>
-
-          <label>
-            Price
-            <input
-              type="number"
-              name="price"
-              value={form.price}
-              onChange={handleChange}
-              placeholder="Enter price"
-              min="0.01"
-              step="0.01"
-              required
-            />
-          </label>
-
-          <label>
-            Available Stock
-            <input
-              type="number"
-              name="stock"
-              value={form.stock}
-              onChange={handleChange}
-              placeholder="Enter stock"
-              min="0"
-              step="1"
-              required
-            />
-          </label>
-
-          <label className="admin-product-full-field">
-            Description
-            <textarea
-              name="description"
-              value={form.description}
-              onChange={handleChange}
-              placeholder="Enter product description"
-              rows="4"
-              required
-            />
-          </label>
-
-          <label className="admin-product-full-field">
-            Product Image URL
-            <input
-              type="url"
-              name="image"
-              value={form.image}
-              onChange={handleChange}
-              placeholder="https://example.com/product.jpg"
-            />
-          </label>
-
-          <div className="admin-product-form-actions admin-product-full-field">
-            <button type="submit" disabled={saving}>
-              {saving
-                ? "Saving..."
-                : editingId
-                  ? "Update Product"
-                  : "Add Product"}
-            </button>
-
-            {editingId && (
-              <button
-                type="button"
-                className="admin-product-cancel"
-                onClick={resetForm}
-              >
-                Cancel
-              </button>
-            )}
+            <p>
+              {editingId
+                ? "Update the selected product details."
+                : "Add a product to the QELVORA catalogue."}
+            </p>
           </div>
-        </form>
 
-        {error && (
-          <p className="admin-products-error">{error}</p>
-        )}
+          <form
+            className="admin-product-form"
+            onSubmit={handleSubmit}
+          >
+            <label>
+              Product Name
+              <input
+                type="text"
+                name="name"
+                value={form.name}
+                onChange={handleChange}
+                placeholder="Enter product name"
+                required
+              />
+            </label>
 
-        {message && (
-          <p className="admin-products-success">{message}</p>
-        )}
-      </section>
+            <label>
+              Category
+              <select
+                name="category"
+                value={form.category}
+                onChange={handleChange}
+                required
+              >
+                <option value="">Select category</option>
+
+                {categories.map((category) => (
+                  <option key={category.id} value={category.id}>
+                    {category.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label>
+              Vendor
+              <select
+                name="vendor"
+                value={form.vendor}
+                onChange={handleChange}
+              >
+                <option value="">Admin-owned product</option>
+
+                {vendors.map((vendor) => (
+                  <option key={vendor.id} value={vendor.id}>
+                    {vendor.username}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label>
+              Price
+              <input
+                type="number"
+                name="price"
+                value={form.price}
+                onChange={handleChange}
+                placeholder="Enter price"
+                min="0.01"
+                step="0.01"
+                required
+              />
+            </label>
+
+            <label>
+              Available Stock
+              <input
+                type="number"
+                name="stock"
+                value={form.stock}
+                onChange={handleChange}
+                placeholder="Enter stock"
+                min="0"
+                step="1"
+                required
+              />
+            </label>
+
+            <label className="admin-product-full-field">
+              Description
+              <textarea
+                name="description"
+                value={form.description}
+                onChange={handleChange}
+                placeholder="Enter product description"
+                rows="4"
+                required
+              />
+            </label>
+
+            <label className="admin-product-full-field">
+              Product Image URL
+              <input
+                type="url"
+                name="image"
+                value={form.image}
+                onChange={handleChange}
+                placeholder="https://example.com/product.jpg"
+              />
+            </label>
+
+            <div className="admin-product-form-actions admin-product-full-field">
+              <button type="submit" disabled={saving}>
+                {saving
+                  ? "Saving..."
+                  : editingId
+                    ? "Update Product"
+                    : "Add Product"}
+              </button>
+
+              {editingId && (
+                <button
+                  type="button"
+                  className="admin-product-cancel"
+                  onClick={resetForm}
+                >
+                  Cancel
+                </button>
+              )}
+            </div>
+          </form>
+        </section>
+      )}
+
+      {error && (
+        <p className="admin-products-error">{error}</p>
+      )}
+
+      {message && (
+        <p className="admin-products-success">{message}</p>
+      )}
 
       {/* Products Table */}
+      {!showForm && (
       <section className="admin-products-list-section">
         <div className="admin-products-section-heading">
           <h2>All Products</h2>
@@ -503,22 +525,17 @@ function AdminProducts() {
                   {products.map((product) => (
                     <tr key={product.id}>
                       <td>#{product.id}</td>
-
                       <td>{product.name}</td>
-
                       <td>
                         {getCategoryName(product.category)}
                       </td>
-
                       <td>
                         ₹
                         {Number(product.price).toLocaleString(
                           "en-IN"
                         )}
                       </td>
-
                       <td>{product.stock}</td>
-
                       <td>
                         {getVendorName(product.vendor)}
                       </td>
@@ -600,6 +617,7 @@ function AdminProducts() {
           </>
         )}
       </section>
+      )}
     </main>
   );
 }

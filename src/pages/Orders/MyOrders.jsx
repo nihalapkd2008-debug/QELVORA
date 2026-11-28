@@ -11,8 +11,13 @@ function MyOrders() {
     const fetchOrders = async () => {
       try {
         const response = await api.get("orders/history/");
-        setOrders(response.data);
-      } catch (err) {
+const data = response.data;
+
+setOrders(
+  Array.isArray(data)
+    ? data
+    : data.results || []
+);      } catch (err) {
         setError(
           err.response?.data?.detail ||
           "Unable to load your orders."

@@ -1,3 +1,4 @@
+
 import { useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import api from "../../services/api";
@@ -38,24 +39,27 @@ function Navbar() {
 
  
 
-  // Change the navbar text colour (white / dark) depending on
-  // which section is behind the navbar while scrolling.
+  // Automatically update navbar theme
   useEffect(() => {
     const updateNavbarTheme = () => {
       if (!navRef.current) return;
 
-      // A line through the middle of the navbar
+      // All inner pages use light navbar by default.
+      const defaultTheme = location.pathname !== "/";
+
       const line = navRef.current.getBoundingClientRect().top + 38;
 
-      const sections = document.querySelectorAll("[data-navbar-theme]");
+      const activeSection = [...document.querySelectorAll("[data-navbar-theme]")]
+        .find((section) => {
+          const box = section.getBoundingClientRect();
+          return box.top <= line && box.bottom >= line;
+        });
 
-      sections.forEach((section) => {
-        const box = section.getBoundingClientRect();
-
-        if (box.top <= line && box.bottom >= line) {
-          setIsOnLight(section.dataset.navbarTheme === "light");
-        }
-      });
+      if (activeSection) {
+        setIsOnLight(activeSection.dataset.navbarTheme === "light");
+      } else {
+        setIsOnLight(defaultTheme);
+      }
     };
 
     updateNavbarTheme();
@@ -68,6 +72,23 @@ function Navbar() {
       window.removeEventListener("resize", updateNavbarTheme);
     };
   }, [location.pathname]);
+
+  // Keep login status updated.
+  useEffect(() => {
+    const updateAuthStatus = () => {
+      setIsLoggedIn(
+        Boolean(localStorage.getItem("access_token"))
+      );
+    };
+
+    window.addEventListener("auth-changed", updateAuthStatus);
+    window.addEventListener("storage", updateAuthStatus);
+
+    return () => {
+      window.removeEventListener("auth-changed", updateAuthStatus);
+      window.removeEventListener("storage", updateAuthStatus);
+    };
+  }, []);
 
   // Fetch products for search.
   useEffect(() => {
@@ -86,7 +107,7 @@ function Navbar() {
     fetchProducts();
   }, []);
 
-  // Lock background scrolling while panel is open.
+  // Lock background scrolling while a panel is open.
   useEffect(() => {
     document.body.style.overflow = activePanel ? "hidden" : "";
 
@@ -115,7 +136,6 @@ function Navbar() {
 
   // Logout function.
   const handleLogout = () => {
-    // Remove the saved tokens so the user is really logged out.
     localStorage.removeItem("access_token");
     localStorage.removeItem("refresh_token");
 
@@ -147,18 +167,25 @@ function Navbar() {
         <strong>{formatPrice(product.price)}</strong>
 
         <div className="shop-product-actions">
-          <button onClick={() => addToCart(product)}>
+          <button
+            type="button"
+            onClick={() => addToCart(product)}
+          >
             ADD TO BAG
           </button>
 
           {showRemove && (
-            <button onClick={() => toggleWishlist(product)}>
+            <button
+              type="button"
+              onClick={() => toggleWishlist(product)}
+            >
               REMOVE
             </button>
           )}
 
           {!showRemove && (
             <button
+              type="button"
               onClick={() => toggleWishlist(product)}
               aria-label="Toggle wishlist"
             >
@@ -197,20 +224,18 @@ function Navbar() {
         </nav>
 
         <div className="nav-actions">
-          {/* Login / Logout */}
-          {isLoggedIn ? (
-            <button
-              type="button"
-              className="nav-auth-link"
-              onClick={handleLogout}
-            >
-              LOGOUT
-            </button>
-          ) : (
-            <Link to="/login" className="nav-auth-link">
-              LOGIN
-            </Link>
-          )}
+          {/* Account */}
+          <button
+            type="button"
+            className="nav-icon-button"
+            aria-label="Account"
+            onClick={() => setActivePanel("account")}
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="8" r="3.5" />
+              <path d="M5 20c0-3.9 2.8-6.5 7-6.5s7 2.6 7 6.5" />
+            </svg>
+          </button>
 
           {/* Search */}
           <button
@@ -253,7 +278,7 @@ function Navbar() {
         </div>
       </header>
 
-      {/* Search / Wishlist / Cart panel */}
+      {/* Account / Search / Wishlist / Cart panel */}
       {activePanel && (
         <div className="shop-panel-backdrop" onClick={closePanel}>
           <section
@@ -265,6 +290,7 @@ function Navbar() {
                 <p>QELVORA</p>
 
                 <h2>
+                  {activePanel === "account" && "My Account"}
                   {activePanel === "search" && "Search"}
                   {activePanel === "wishlist" && "Your Wishlist"}
                   {activePanel === "cart" && "Your Shopping Bag"}
@@ -282,6 +308,30 @@ function Navbar() {
               </button>
             </div>
 
+            {/* Account */}
+            {activePanel === "account" && (
+              <div className="shop-account-content">
+                {isLoggedIn ? (
+                  <>
+                    <Link to="/orders" onClick={closePanel}>
+                      MY ORDERS
+                    </Link>
+
+                    <button
+                      type="button"
+                      onClick={handleLogout}
+                    >
+                      LOGOUT
+                    </button>
+                  </>
+                ) : (
+                  <Link to="/login" onClick={closePanel}>
+                    LOGIN
+                  </Link>
+                )}
+              </div>
+            )}
+
             {/* Search */}
             {activePanel === "search" && (
               <div className="shop-search-content">
@@ -296,7 +346,9 @@ function Navbar() {
                 />
 
                 {searchError && (
-                  <p className="shop-empty-message">{searchError}</p>
+                  <p className="shop-empty-message">
+                    {searchError}
+                  </p>
                 )}
 
                 {!searchText.trim() && !searchError && (
@@ -410,14 +462,14 @@ function Navbar() {
                       </p>
 
                       <button
-  type="button"
-  onClick={() => {
-    closePanel();
-    navigate("/checkout");
-  }}
->
-  PROCEED TO CHECKOUT
-</button>
+                        type="button"
+                        onClick={() => {
+                          closePanel();
+                          navigate("/checkout");
+                        }}
+                      >
+                        PROCEED TO CHECKOUT
+                      </button>
                     </div>
                   </>
                 )}

@@ -297,32 +297,37 @@ export function ShopProvider({ children }) {
   }, [cart, loadBackendCart]);
 
   // Place customer order
-  const placeOrder = useCallback(async () => {
-    if (!isLoggedIn()) {
-      throw new Error("Please login to place your order.");
-    }
+  
+const placeOrder = useCallback(async (orderDetails) => {
+  if (!isLoggedIn()) {
+    throw new Error("Please login to place your order.");
+  }
 
-    if (cart.length === 0) {
-      throw new Error("Your cart is empty.");
-    }
+  if (cart.length === 0) {
+    throw new Error("Your cart is empty.");
+  }
 
-    try {
-      const response = await api.post("orders/");
+  try {
+    const response = await api.post("orders/", orderDetails);
 
-      setCart([]);
-      localStorage.removeItem("qelvora-cart");
+    setCart([]);
+    localStorage.removeItem("qelvora-cart");
 
-      return response.data.order;
-    } catch (error) {
-      console.error("Place order error:", error);
+    return response.data.order;
+  } catch (error) {
+    console.error("Place order error:", error);
 
-      throw new Error(
-        error.response?.data?.error ||
-        "Unable to place your order. Please try again.",
-        { cause: error }
-      );
-    }
-  }, [cart]);
+    throw new Error(
+      error.response?.data?.error
+        ? typeof error.response.data.error === "string"
+          ? error.response.data.error
+          : Object.values(error.response.data.error).flat().join(" ")
+        : "Unable to place your order. Please try again.",
+      { cause: error }
+    );
+  }
+}, [cart]);
+
 
   // Calculate cart quantity
   const cartCount = useMemo(

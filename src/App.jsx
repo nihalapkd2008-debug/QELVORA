@@ -11,8 +11,9 @@ import ProductDetails from "./pages/Products/ProductDetails.jsx";
 
 import AdminDashboard from "./pages/Admin/AdminDashboard.jsx";
 import AdminProducts from "./pages/Admin/AdminProducts.jsx";
+import AdminOrders from "./pages/Admin/AdminOrders.jsx";
 import VendorDashboard from "./pages/Vendor/VendorDashboard.jsx";
-
+import AdminHeader from "./pages/Admin/AdminHeader.jsx";
 import Login from "./pages/Auth/Login.jsx";
 import Register from "./pages/Auth/Register.jsx";
 import Checkout from "./pages/Checkout/Checkout.jsx";
@@ -28,51 +29,53 @@ function App() {
     location.pathname
   );
 
+  const isAdminPage = location.pathname.startsWith("/admin");
+
+  const showStoreLayout = !isAuthPage && !isAdminPage;
+
   return (
     <ShopProvider>
       <ScrollToTop />
 
-      {!isAuthPage && <Navbar />}
-
+      {showStoreLayout && <Navbar />}
+      {isAdminPage && <AdminHeader />}
       <Routes>
-        {/* Public authentication pages */}
+        {/* Authentication */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
-        {/* All authenticated users */}
-        <Route element={<ProtectedRoute />}>
-          <Route path="/" element={<HomePage />} />
+        {/* Public Shopping */}
+        <Route path="/" element={<HomePage />} />
+        <Route
+          path="/category/:categoryName"
+          element={<CategoryProducts />}
+        />
+        <Route
+          path="/product/:productId"
+          element={<ProductDetails />}
+        />
 
-          <Route
-            path="/category/:categoryName"
-            element={<CategoryProducts />}
-          />
-
-          <Route
-            path="/product/:productId"
-            element={<ProductDetails />}
-          />
-        </Route>
-
-        {/* Admin only */}
+        {/* Admin */}
         <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/products" element={<AdminProducts />} />
+          <Route path="/admin/orders" element={<AdminOrders />} />
         </Route>
 
-        {/* Approved Vendor only */}
+        {/* Vendor */}
         <Route element={<ProtectedRoute allowedRoles={["vendor"]} />}>
           <Route path="/vendor" element={<VendorDashboard />} />
         </Route>
 
-        {/* Customer only */}
+        {/* Customer */}
+        <Route path="/checkout" element={<Checkout />} />
         <Route element={<ProtectedRoute allowedRoles={["customer"]} />}>
-          <Route path="/checkout" element={<Checkout />} />
           <Route path="/orders" element={<MyOrders />} />
         </Route>
+        
       </Routes>
 
-      {!isAuthPage && <Footer />}
+      {showStoreLayout && <Footer />}
     </ShopProvider>
   );
 }

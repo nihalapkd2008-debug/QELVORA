@@ -1,6 +1,5 @@
 
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import api from "../../services/api";
 import "./AdminDashboard.css";
 
@@ -16,7 +15,15 @@ function AdminDashboard() {
     api.get("accounts/admin/users/")
       .then((response) => {
         if (isMounted) {
-          setUsers(response.data);
+          const data = response.data;
+
+          setUsers(
+            Array.isArray(data)
+              ? data
+              : Array.isArray(data.results)
+                ? data.results
+                : []
+          );
         }
       })
       .catch(() => {
@@ -64,23 +71,14 @@ function AdminDashboard() {
   const blockedUsers = users.filter((user) => !user.is_active).length;
 
   return (
-    <main className="admin-dashboard">
-      
-<div className="admin-header">
-  <div>
-    <p className="admin-eyebrow">QELVORA MANAGEMENT</p>
-    <h1>Admin Dashboard</h1>
-    <p>Manage customers and monitor user accounts.</p>
-
-    <Link
-      to="/admin/products"
-      className="admin-manage-products-link"
-    >
-      Manage Products
-    </Link>
-  </div>
-</div>
-
+    <main className="admin-dashboard" data-navbar-theme="light">
+      <div className="admin-header">
+        <div>
+          <p className="admin-eyebrow">QELVORA MANAGEMENT</p>
+          <h1>Admin Dashboard</h1>
+          <p>Manage customers and monitor user accounts.</p>
+        </div>
+      </div>
 
       <section className="admin-stats">
         <article className="admin-stat-card">
@@ -137,13 +135,10 @@ function AdminDashboard() {
                 {users.map((user) => (
                   <tr key={user.id}>
                     <td>{user.username}</td>
-
                     <td>{user.email || "—"}</td>
-
                     <td>
                       {user.is_staff ? "Admin" : user.role}
                     </td>
-
                     <td>{user.vendor_status || "—"}</td>
 
                     <td>

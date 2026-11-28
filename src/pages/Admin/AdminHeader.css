@@ -1,0 +1,114 @@
+.admin-header {
+  min-height: 70px;
+  padding: 0 4%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 25px;
+  background: #000000;
+  color: #fff;
+  border-bottom: 20px solid #000000;
+}
+
+
+.admin-eyebrow {
+  margin: 0 0 10px;
+  color: #b99a5b;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.admin-header h1 {
+  margin: 0 0 8px;
+  color: #fff;
+  font-family: "Playfair Display", serif;
+  font-size: 30px;
+  font-weight: 600;
+}
+
+.admin-header p:last-child {
+  margin: 0;
+  color: #ccc;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.admin-brand {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: #fff;
+  font-family: "Playfair Display", serif;
+  font-size: 23px;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.admin-brand span {
+  color: #b99a5b;
+}
+
+.admin-brand small {
+  padding-left: 9px;
+  border-left: 1px solid #666;
+  color: #b99a5b;
+  font-family: inherit;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+}
+
+.admin-nav {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+}
+
+.admin-nav a {
+  color: #ccc;
+  font-size: 13px;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.admin-nav a:hover,
+.admin-nav a.active {
+  color: #c5a66b;
+}
+
+.admin-logout {
+  padding: 9px 17px;
+  border: 1px solid #b99a5b;
+  background: transparent;
+  color: #fff;
+  font-family: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.admin-logout:hover {
+  background: #b99a5b;
+  color: #242424;
+}
+
+@media (max-width: 700px) {
+  .admin-header {
+    padding: 18px 4%;
+    flex-wrap: wrap;
+  }
+
+  .admin-nav {
+    order: 3;
+    width: 100%;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .admin-nav a {
+    font-size: 12px;
+  }
+}

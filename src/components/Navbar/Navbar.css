@@ -422,3 +422,30 @@
 .nav-auth-link:hover {
   opacity: 0.6;
 }
+.shop-account-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 24px 0;
+}
+
+.shop-account-content a,
+.shop-account-content button {
+  display: block;
+  width: 100%;
+  padding: 15px 18px;
+  border: 1px solid rgba(185, 154, 98, 0.4);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 12px;
+  letter-spacing: 1.5px;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.shop-account-content a:hover,
+.shop-account-content button:hover {
+  background: rgba(185, 154, 98, 0.12);
+}

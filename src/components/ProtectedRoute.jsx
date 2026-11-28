@@ -17,7 +17,7 @@ function ProtectedRoute({ allowedRoles }) {
 
     let isMounted = true;
 
-    api.get("auth/me/")
+    api.get("accounts/me/")
       .then((response) => {
         if (isMounted) {
           setUserResult({

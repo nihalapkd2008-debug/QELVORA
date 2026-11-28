@@ -310,3 +310,20 @@
     flex-wrap: wrap;
   }
 }
+.admin-add-product-toggle {
+  margin-top: 20px;
+  padding: 12px 20px;
+  border-radius: 4px;
+  background: #242424;
+  color: #fff;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.admin-add-product-toggle:hover {
+  background: #b99a5b;
+  color: #242424;
+}

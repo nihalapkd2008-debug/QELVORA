@@ -2,17 +2,29 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import api from "../../services/api";
 
+
 export const fetchProducts = createAsyncThunk(
   "products/fetchProducts",
   async (_, thunkAPI) => {
     try {
-      const response = await api.get("products/");
+      let nextUrl = "products/";
+      const allProducts = [];
 
-      const data = response.data;
+      while (nextUrl) {
+        const response = await api.get(nextUrl);
+        const data = response.data;
 
-      return Array.isArray(data)
-        ? data
-        : data.results || [];
+        // Support both paginated and non-paginated responses
+        if (Array.isArray(data)) {
+          allProducts.push(...data);
+          break;
+        }
+
+        allProducts.push(...(data.results || []));
+        nextUrl = data.next;
+      }
+
+      return allProducts;
     } catch (error) {
       return thunkAPI.rejectWithValue(
         error.response?.data?.detail ||
@@ -21,6 +33,7 @@ export const fetchProducts = createAsyncThunk(
     }
   }
 );
+
 
 const productsSlice = createSlice({
   name: "products",
