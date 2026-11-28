@@ -13,7 +13,7 @@ import AdminDashboard from "./pages/Admin/AdminDashboard.jsx";
 import AdminProducts from "./pages/Admin/AdminProducts.jsx";
 import AdminOrders from "./pages/Admin/AdminOrders.jsx";
 import VendorDashboard from "./pages/Vendor/VendorDashboard.jsx";
-import AdminHeader from "./pages/Admin/AdminHeader.jsx";
+import AdminHeader from "./pages/Admin/components/AdminHeader";
 import Login from "./pages/Auth/Login.jsx";
 import Register from "./pages/Auth/Register.jsx";
 import Checkout from "./pages/Checkout/Checkout.jsx";

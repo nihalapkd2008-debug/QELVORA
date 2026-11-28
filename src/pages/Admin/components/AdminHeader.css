@@ -1,0 +1,340 @@
+
+/* =========================================
+   QELVORA — ADMIN DESIGN SYSTEM
+========================================= */
+
+.admin-sidebar,
+.admin-dashboard,
+.admin-products-page,
+.admin-orders {
+  font-family: "DM Sans", sans-serif !important;
+}
+
+/* Consistent typography */
+
+.admin-dashboard *,
+.admin-products-page *,
+.admin-orders * {
+  font-family: "DM Sans", sans-serif !important;
+}
+
+.admin-dashboard h1,
+.admin-dashboard h2,
+.admin-dashboard h3,
+.admin-products-page h1,
+.admin-products-page h2,
+.admin-products-page h3,
+.admin-orders h1,
+.admin-orders h2,
+.admin-orders h3 {
+  font-family: "Playfair Display", serif !important;
+  font-weight: 500 !important;
+}
+
+/* Form controls and buttons */
+
+.admin-dashboard button,
+.admin-products-page button,
+.admin-orders button,
+.admin-products-page input,
+.admin-products-page select,
+.admin-products-page textarea,
+.admin-orders select {
+  font-family: "DM Sans", sans-serif !important;
+}
+
+/* =========================================
+   ADMIN SIDEBAR
+========================================= */
+
+.admin-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+  width: 250px;
+  height: 100vh;
+  padding: 30px 20px;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  background: #242424;
+  color: #fff;
+  border-right: 1px solid #383838;
+}
+
+.admin-sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #fff;
+  font-family: "Playfair Display", serif !important;
+  font-size: 24px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.admin-sidebar-brand span {
+  color: #b99a5b;
+}
+
+.admin-sidebar-brand small {
+  margin-left: 8px;
+  padding-left: 9px;
+  border-left: 1px solid #666;
+  color: #b99a5b;
+  font-family: "DM Sans", sans-serif !important;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+}
+
+.admin-sidebar-divider {
+  height: 1px;
+  margin: 28px 0;
+  background: #414141;
+}
+
+.admin-sidebar-label {
+  margin: 0 0 15px 10px;
+  color: #929292;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+}
+
+.admin-sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.admin-sidebar-nav a,
+.admin-sidebar-logout {
+  min-height: 46px;
+  padding: 0 13px;
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  border: none;
+  border-radius: 5px;
+  background: transparent;
+  color: #c5c5c5;
+  font-family: "DM Sans", sans-serif !important;
+  font-size: 13px;
+  text-decoration: none;
+  text-align: left;
+  cursor: pointer;
+  transition: 0.25s ease;
+}
+
+.admin-sidebar-nav a:hover,
+.admin-sidebar-logout:hover {
+  background: #353535;
+  color: #d5b779;
+}
+
+.admin-sidebar-nav a.active {
+  background: #3b362c;
+  color: #d5b779;
+  border-left: 3px solid #b99a5b;
+}
+
+.admin-sidebar-icon {
+  width: 20px;
+  font-size: 19px;
+  text-align: center;
+}
+
+.admin-sidebar-bottom {
+  margin-top: auto;
+}
+
+.admin-sidebar-logout {
+  width: 100%;
+}
+
+/* =========================================
+   PAGE LAYOUT
+========================================= */
+
+.admin-dashboard,
+.admin-products-page,
+.admin-orders {
+  width: calc(100% - 250px);
+  margin-left: 250px;
+  box-sizing: border-box;
+}
+
+/* =========================================
+   PRODUCTS + ORDERS BACKGROUND
+========================================= */
+
+.admin-products-page,
+.admin-orders {
+  position: relative;
+  isolation: isolate;
+  background-color: #f6f4ef !important;
+  background-image:
+    radial-gradient(
+      circle at 85% 10%,
+      rgba(206, 183, 135, 0.20),
+      transparent 32%
+    ),
+    radial-gradient(
+      circle at 5% 80%,
+      rgba(190, 178, 153, 0.15),
+      transparent 35%
+    ) !important;
+  background-size: 160% 160%;
+  animation: adminBackgroundMove 18s ease-in-out infinite alternate;
+}
+
+@keyframes adminBackgroundMove {
+  0% {
+    background-position: 0% 0%;
+  }
+  50% {
+    background-position: 100% 40%;
+  }
+  100% {
+    background-position: 30% 100%;
+  }
+}
+
+/* =========================================
+   PREMIUM CARDS
+========================================= */
+
+.admin-products-stats article,
+.admin-product-form-section,
+.admin-products-list-section,
+.admin-orders-summary-card,
+.admin-orders-section {
+  border-radius: 7px;
+  box-shadow: 0 8px 30px rgba(45, 38, 26, 0.045);
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease,
+    border-color 0.3s ease;
+}
+
+.admin-products-stats article:hover,
+.admin-orders-summary-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 32px rgba(45, 38, 26, 0.09);
+}
+
+/* =========================================
+   FORM FOCUS
+========================================= */
+
+.admin-products-page input:focus,
+.admin-products-page select:focus,
+.admin-products-page textarea:focus {
+  border-color: #a88750;
+  box-shadow: 0 0 0 3px rgba(168, 135, 80, 0.10);
+}
+
+/* =========================================
+   PAGE ANIMATION
+========================================= */
+
+.admin-products-page,
+.admin-orders {
+  animation: adminPageEnter 0.55s ease both;
+}
+
+@keyframes adminPageEnter {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* =========================================
+   RESPONSIVE SIDEBAR
+========================================= */
+
+@media (max-width: 700px) {
+  .admin-sidebar {
+    width: 72px;
+    padding: 22px 10px;
+    align-items: center;
+  }
+
+  .admin-sidebar-brand {
+    font-size: 18px;
+  }
+
+  .admin-sidebar-brand small,
+  .admin-sidebar-label,
+  .admin-sidebar-nav a > span:last-child,
+  .admin-sidebar-logout > span:last-child {
+    display: none;
+  }
+
+  .admin-sidebar-divider {
+    width: 100%;
+    margin: 22px 0;
+  }
+
+  .admin-sidebar-nav {
+    width: 100%;
+  }
+
+  .admin-sidebar-nav a,
+  .admin-sidebar-logout {
+    justify-content: center;
+    padding: 0;
+  }
+
+  .admin-sidebar-icon {
+    font-size: 20px;
+  }
+
+  .admin-dashboard,
+  .admin-products-page,
+  .admin-orders {
+    width: calc(100% - 72px);
+    margin-left: 72px;
+  }
+}
+
+/* =========================================
+   REDUCED MOTION
+========================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .admin-products-page,
+  .admin-orders,
+  .admin-products-stats article,
+  .admin-orders-summary-card {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+.admin-theme-toggle {
+  width: 100%;
+  min-height: 46px;
+  padding: 0 13px;
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  border: none;
+  border-radius: 5px;
+  background: transparent;
+  color: #c5c5c5;
+  font-family: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.admin-theme-toggle:hover {
+  background: #353535;
+  color: #d5b779;
+}

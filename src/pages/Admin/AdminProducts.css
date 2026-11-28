@@ -4,9 +4,26 @@
   padding: 55px 6%;
   background: #f8f7f4;
   color: #242424;
+  font-family: "DM Sans", sans-serif;
+  transition: background 0.25s ease, color 0.25s ease;
+}
+
+.admin-products-page * {
+  font-family: "DM Sans", sans-serif;
+}
+
+.admin-products-page h1,
+.admin-products-page h2,
+.admin-products-page h3 {
+  font-family: "Playfair Display", serif;
+  font-weight: 500;
 }
 
 .admin-products-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
   margin-bottom: 35px;
 }
 
@@ -212,28 +229,6 @@
   color: #777;
 }
 
-@media (max-width: 700px) {
-  .admin-products-page {
-    padding: 35px 4%;
-  }
-
-  .admin-products-stats {
-    grid-template-columns: 1fr;
-  }
-
-  .admin-product-form {
-    grid-template-columns: 1fr;
-  }
-
-  .admin-product-full-field {
-    grid-column: auto;
-  }
-
-  .admin-product-form-section,
-  .admin-products-list-section {
-    padding: 18px;
-  }
-}
 .admin-manage-products-link {
   display: inline-block;
   margin-top: 18px;
@@ -244,7 +239,7 @@
   font-size: 13px;
 }
 
-/* Admin Products Pagination */
+/* Pagination */
 
 .admin-products-pagination {
   display: flex;
@@ -300,19 +295,12 @@
   cursor: not-allowed;
 }
 
-@media (max-width: 700px) {
-  .admin-products-pagination {
-    flex-direction: column;
-    align-items: flex-start;
-  }
+/* Add Product Button */
 
-  .admin-products-pagination-controls {
-    flex-wrap: wrap;
-  }
-}
 .admin-add-product-toggle {
   margin-top: 20px;
   padding: 12px 20px;
+  border: none;
   border-radius: 4px;
   background: #242424;
   color: #fff;
@@ -326,4 +314,155 @@
 .admin-add-product-toggle:hover {
   background: #b99a5b;
   color: #242424;
+}
+
+/* =========================================
+   DARK MODE
+========================================= */
+
+.admin-products-page.admin-dark {
+  background: #171717;
+  color: #f2eee7;
+}
+
+.admin-dark .admin-products-header > div > p:last-child,
+.admin-dark .admin-products-section-heading p {
+  color: #aaa39a;
+}
+
+.admin-dark .admin-products-stats article,
+.admin-dark .admin-product-form-section,
+.admin-dark .admin-products-list-section {
+  background: #222222;
+  border-color: #39352f;
+}
+
+.admin-dark .admin-products-stats span {
+  color: #aaa39a;
+}
+
+.admin-dark .admin-product-form label {
+  color: #d0c9bf;
+}
+
+.admin-dark .admin-product-form input,
+.admin-dark .admin-product-form select,
+.admin-dark .admin-product-form textarea {
+  background: #292929;
+  border-color: #48423a;
+  color: #f2eee7;
+}
+
+.admin-dark .admin-product-form input::placeholder,
+.admin-dark .admin-product-form textarea::placeholder {
+  color: #8f8981;
+}
+
+.admin-dark .admin-product-form input:focus,
+.admin-dark .admin-product-form select:focus,
+.admin-dark .admin-product-form textarea:focus {
+  border-color: #b99a5b;
+}
+
+.admin-dark .admin-product-form-actions button {
+  border-color: #b99a5b;
+  background: #b99a5b;
+  color: #171717;
+}
+
+.admin-dark .admin-product-form-actions .admin-product-cancel {
+  border-color: #625b50;
+  background: transparent;
+  color: #eee8dd;
+}
+
+.admin-dark .admin-products-table th {
+  background: #2c2a27;
+  color: #c4b9a8;
+}
+
+.admin-dark .admin-products-table th,
+.admin-dark .admin-products-table td {
+  border-bottom-color: #39352f;
+}
+
+.admin-dark .admin-products-table td {
+  color: #e8e2d8;
+}
+
+.admin-dark .admin-products-pagination {
+  border-top-color: #39352f;
+}
+
+.admin-dark .admin-products-pagination-info {
+  color: #aaa39a;
+}
+
+.admin-dark .admin-products-pagination-info strong {
+  color: #f2eee7;
+}
+
+.admin-dark .admin-products-page-button {
+  border-color: #49433a;
+  background: #292929;
+  color: #e8e2d8;
+}
+
+.admin-dark .admin-products-page-button.active {
+  border-color: #b99a5b;
+  background: #b99a5b;
+  color: #171717;
+}
+
+.admin-dark .admin-add-product-toggle {
+  background: #b99a5b;
+  color: #171717;
+}
+
+.admin-dark .admin-add-product-toggle:hover {
+  background: #d0b77e;
+}
+
+.admin-dark .admin-manage-products-link {
+  background: #b99a5b;
+  color: #171717;
+}
+
+/* Responsive */
+
+@media (max-width: 700px) {
+  .admin-products-page {
+    padding: 35px 4%;
+  }
+
+  .admin-products-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .admin-products-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-product-form {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-product-full-field {
+    grid-column: auto;
+  }
+
+  .admin-product-form-section,
+  .admin-products-list-section {
+    padding: 18px;
+  }
+
+  .admin-products-pagination {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .admin-products-pagination-controls {
+    flex-wrap: wrap;
+  }
 }

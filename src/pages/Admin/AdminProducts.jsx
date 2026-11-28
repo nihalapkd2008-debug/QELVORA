@@ -1,6 +1,7 @@
 
 import { useEffect, useState } from "react";
 import api from "../../services/api";
+import { useAdminTheme } from "./context/useAdminTheme";
 import "./AdminProducts.css";
 
 const initialForm = {
@@ -16,6 +17,8 @@ const initialForm = {
 const PAGE_SIZE = 10;
 
 function AdminProducts() {
+  const { darkMode } = useAdminTheme();
+
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [vendors, setVendors] = useState([]);
@@ -298,7 +301,9 @@ function AdminProducts() {
   );
 
   return (
-    <main className="admin-products-page">
+    <main
+      className={`admin-products-page ${darkMode ? "admin-dark" : ""}`}
+    >
       <header className="admin-products-header">
         <div>
           <p className="admin-products-eyebrow">
@@ -486,7 +491,6 @@ function AdminProducts() {
       )}
 
       {/* Products Table */}
-      {!showForm && (
       <section className="admin-products-list-section">
         <div className="admin-products-section-heading">
           <h2>All Products</h2>
@@ -526,9 +530,7 @@ function AdminProducts() {
                     <tr key={product.id}>
                       <td>#{product.id}</td>
                       <td>{product.name}</td>
-                      <td>
-                        {getCategoryName(product.category)}
-                      </td>
+                      <td>{getCategoryName(product.category)}</td>
                       <td>
                         ₹
                         {Number(product.price).toLocaleString(
@@ -536,9 +538,7 @@ function AdminProducts() {
                         )}
                       </td>
                       <td>{product.stock}</td>
-                      <td>
-                        {getVendorName(product.vendor)}
-                      </td>
+                      <td>{getVendorName(product.vendor)}</td>
 
                       <td>
                         <div className="admin-products-actions">
@@ -617,7 +617,6 @@ function AdminProducts() {
           </>
         )}
       </section>
-      )}
     </main>
   );
 }
